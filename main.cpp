@@ -1,16 +1,26 @@
+#include <fstream>
 #include <iostream>
+#include <map>
+#include <mutex>
+#include <queue>
+#include <stack>
+#include <thread>
+#include <utility>
 #include <vector>
 
 using namespace std;
 
-int main() {
+vector<double> BC, sigma, delta;
+vector<int> V, d;
+vector<vector<int>> P, neighbour;
+int n;
+
+int main(int argc, char *argv[]) {
     /**
      * for each v : V
      *  BC[v] = 0;
      */
-    vector<double> BC, sigma, delta;
-    vector<int> V, d;
-    vector<vector<int>> P, neighbour;
+
 
 
     /**
@@ -30,7 +40,8 @@ int main() {
         vector<int> S = {}; //stack
         sigma[s] = 1;
         d[s] = 0;
-        vector<int> Q; //FIFO, queue, reverse kolejność
+        vector<int> Q; //FIFO, queue, reverse kolejność, ew TODO change on
+        // queue
         Q.insert(Q.begin(), s);
         while (!Q.empty()) {
             int v = Q.back();
