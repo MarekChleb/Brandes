@@ -109,6 +109,17 @@ void do_brandes_instances() {
     }
 }
 
+void perform_brandes(int thread_count) {
+    vector<thread> threads;
+    for (int i = 0; i < thread_count; i++) {
+        threads.push_back(thread(do_brandes_instances));
+    }
+
+    for (int i = 0; i < thread_count; i++) {
+        threads[i].join();
+    }
+}
+
 void print_output_into_file(string output_file) {
     ofstream file(output_file);
     if (file.is_open()) {
@@ -122,8 +133,14 @@ void print_output_into_file(string output_file) {
 }
 
 int main(int argc, char *argv[]) {
+    int thread_count = atoi(argv[1]);
+    string input = argv[2];
+    string output = argv[3];
 
-
+    read_input(input);
+    close_the_gaps();
+    perform_brandes(thread_count);
+    print_output_into_file(output);
 
     return 0;
 }
