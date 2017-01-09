@@ -10,7 +10,7 @@ int main() {
      */
     vector<double> BC, sigma, delta;
     vector<int> V, d;
-    vector<vector<int>> P;
+    vector<vector<int>> P, neighbour;
 
 
     /**
@@ -31,59 +31,40 @@ int main() {
         sigma[s] = 1;
         d[s] = 0;
         vector<int> Q; //FIFO, queue, reverse kolejność
-        Q.push_back(s);
+        Q.insert(Q.begin(), s);
         while (!Q.empty()) {
-            int v = Q.
+            int v = Q.back();
+            Q.pop_back();
+            S.push_back(s);
+            for (int w: neighbour[v]) {
+                if (d[w] < 0) {
+                    Q.insert(Q.begin(), w);
+                    d[w] = d[v] + 1;
+                }
+                if (d[w] == d[v] + 1) {
+                    sigma[w] += sigma[v];
+                    P[w].push_back(v);
+                }
+            }
+        }
+        while (!S.empty()) {
+            int w = S.back();
+            S.pop_back();
+            for (int v: P[w]) {
+                delta[v] += (sigma[v] / sigma[w]) * (1 + delta[w]);
+            }
+            if (w != s) {
+                BC[w] += delta[w];
+            }
         }
     }
     /**
      *
-
-
-   sigma[s] = 1;
-
-   d[s] = 0;
-
-   Q = queue(); // FIFO
-
-   Q.push_back(s);
-
-   while (!Q.empty()) {
-
-      v = Q.pop_front();
-
-      S.push(v);
-
-      for each neighbor w of v {
-
-         if d[w] < 0 {
-
-            Q.push_back(w);
-
-            d[w] = d[v] + 1;
-
-         }
-
-         if (d[w] == d[v] + 1) {
-
-            sigma[w] += sigma[v];
-
-            P[w].append(v);
-
-         }
-
-      }
-
    }
-
    while (!S.empty()) {
-
      w = S.pop();
-
      for each v in P[w]
-
         delta[v] += (sigma[v] / sigma[w])(1 + delta[w]);
-
      if (w != s)
 
         BC[w] += delta[w];
