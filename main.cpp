@@ -10,11 +10,11 @@
 
 using namespace std;
 
-vector<double> BC, sigma, delta;
-vector<int> V, d;
-vector<vector<int>> P, neighbour;
+vector<double> BC;
+vector<vector<int>> neighbour;
 unsigned int n;
 int current_node;
+bool DEBUG = true;
 
 map<int, vector<int>> beg_map;
 vector<int> names;
@@ -22,8 +22,14 @@ mutex mutex_BC;
 mutex mutex_neighbour;
 
 void add_to_beg(int a, int b) {
+    if (DEBUG) {
+        cout << "Adding to beg " << a << ", " << b << endl;
+    }
     auto result_of_insert = beg_map.insert(make_pair(a, vector<int>{b}));
     if (!result_of_insert.second) {
+        if (DEBUG) {
+            cout << a << " already exists in the map\n";
+        }
         result_of_insert.first->second.push_back(b);
     }
     beg_map.insert(make_pair(b, vector<int>()));
@@ -43,34 +49,62 @@ void read_input(string input) {
 
 void close_the_gaps() {
     int i = 0;
-    neighbour.reserve(n);
-    names.reserve(n);
+    neighbour.resize(n);
+    names.resize(n);
+    BC.resize(n);
     for (auto it = beg_map.begin(); it != beg_map.end(); it++, i++) {
-        names[i] = it->first;
-        neighbour[i] = it->second;
+        if (DEBUG) {
+            cout << i << ": " << it->first << endl;
+        }
+        names[i] = (it->first);
+        neighbour[i] = (it->second);
+        if (DEBUG) {
+            for (auto k: it->second) {
+                cout << k << " ";
+            }
+            cout << endl;
+        }
+    }
+    if (DEBUG) {
+        for (int j = 0; j < n; j++) {
+            cout << j << ": " << names[j] << " and " << neighbour[j].size()
+                 << endl;
+        }
     }
 }
 
 void brandes(int s) {
-    vector<int> S = {}; //stack
-    vector<int> Q; //FIFO, queue, reverse kolejność, ew TODO change on
-    // queue
+    stack<int> S;
+    queue<int> Q;
+    double delta[n], sigma[n], d[n];
+    vector<int> P[n];
 
-    P.assign(n, vector<int>());
-    sigma.assign(n, 0);
-    d.assign(n, -1);
-    delta.assign(n , 0);
+    for (int w = 0; w < n; w++) {
+        P[w] = vector<int>();
+        sigma[w] = 0;
+        d[w] = -1;
+        delta[w] = 0;
+    }
 
-    Q.insert(Q.begin(), s);
+    //P.resize(n);
+    //P.assign(n, vector<int>());
+    //sigma.resize(n);
+    //sigma.assign(n, 0);
+    //d.resize(n);
+    //d.assign(n, -1);
+    //delta.resize(n);
+    //delta.assign(n , 0);
+
+    Q.push(s);
     sigma[s] = 1;
     d[s] = 0;
     while (!Q.empty()) {
         int v = Q.back();
-        Q.pop_back();
-        S.push_back(s);
+        Q.pop();
+        S.push(v);
         for (int w: neighbour[v]) {
             if (d[w] < 0) {
-                Q.insert(Q.begin(), w);
+                Q.push(w);
                 d[w] = d[v] + 1;
             }
             if (d[w] == d[v] + 1) {
@@ -80,8 +114,8 @@ void brandes(int s) {
         }
     }
     while (!S.empty()) {
-        int w = S.back();
-        S.pop_back();
+        int w = S.top();
+        S.pop();
         for (int v: P[w]) {
             delta[v] += (sigma[v] / sigma[w]) * (1 + delta[w]);
         }
